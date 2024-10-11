@@ -7,7 +7,7 @@
 
 import Cocoa
 import SwiftUI
-
+import Foundation
 
 struct SwiftUIView: View {
     var body: some View {
@@ -18,9 +18,9 @@ struct SwiftUIView: View {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-
+    private var whisperContext: WhisperContext?
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
@@ -29,17 +29,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         setupMenus()
         
-        
-        
-        
         let model_url = Bundle.main.url(forResource: "ggml-base.en", withExtension: "bin", subdirectory: "models")
-
         
-        
-        
-        
+        if let modelPath = model_url?.path {
+            Task {
+                do {
+                    self.whisperContext = try await WhisperContext.createContext(path: modelPath)
+                    print("Whisper context created successfully")
+                } catch {
+                    print("Error creating Whisper context: \(error)")
+                }
+            }
+        } else {
+            print("Error: Could not find the model file")
+        }
     }
-    
     
     func setupMenus() {
         let menu = NSMenu()
@@ -60,7 +64,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // 3
         statusItem.menu = menu
     }
-    
     
     private func changeStatusBarButton(number: Int) {
         if let button = statusItem.button {

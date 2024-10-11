@@ -1,0 +1,10 @@
+* log
+** whisper.cpp
+
+bash ./models/download-ggml-model.sh base.en
+
+
+
+brew install sdl
+make stream
+./stream -m ./models/ggml-base.en.bin -t 8 --step 500 --length 5000

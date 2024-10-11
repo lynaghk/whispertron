@@ -14,6 +14,7 @@
 		40F8347F2CA72482007DAA65 /* whisper in Frameworks */ = {isa = PBXBuildFile; productRef = 40F8347E2CA72482007DAA65 /* whisper */; };
 		40F834812CA724C8007DAA65 /* LibWhisper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F834802CA724C8007DAA65 /* LibWhisper.swift */; };
 		40F834832CA72889007DAA65 /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F834822CA72889007DAA65 /* Recorder.swift */; };
+		D7ECCB332CB9429E00558635 /* models in Resources */ = {isa = PBXBuildFile; fileRef = D7ECCB322CB9429E00558635 /* models */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		40F8347B2CA71E4E007DAA65 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		40F834802CA724C8007DAA65 /* LibWhisper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibWhisper.swift; sourceTree = "<group>"; };
 		40F834822CA72889007DAA65 /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
+		D7ECCB322CB9429E00558635 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = mt/models; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +44,7 @@
 		40F8345E2CA70F3A007DAA65 = {
 			isa = PBXGroup;
 			children = (
+				D7ECCB322CB9429E00558635 /* models */,
 				40F834692CA70F3A007DAA65 /* mt */,
 				40F834682CA70F3A007DAA65 /* Products */,
 			);
@@ -133,6 +136,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7ECCB332CB9429E00558635 /* models in Resources */,
 				40F8346F2CA70F3B007DAA65 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

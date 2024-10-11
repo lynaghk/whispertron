@@ -7,3 +7,5 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+models/
