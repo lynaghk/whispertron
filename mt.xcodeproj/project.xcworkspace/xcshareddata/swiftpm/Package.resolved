@@ -1,0 +1,13 @@
+{
+  "pins" : [
+    {
+      "identity" : "whisper.cpp",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ggerganov/whisper.cpp",
+      "state" : {
+        "revision" : "8feb375fbdf0277ad36958c218c6bf48fa0ba75a"
+      }
+    }
+  ],
+  "version" : 2
+}
