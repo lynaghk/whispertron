@@ -15,6 +15,7 @@
 		40F834812CA724C8007DAA65 /* LibWhisper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F834802CA724C8007DAA65 /* LibWhisper.swift */; };
 		40F834832CA72889007DAA65 /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F834822CA72889007DAA65 /* Recorder.swift */; };
 		D7ECCB332CB9429E00558635 /* models in Resources */ = {isa = PBXBuildFile; fileRef = D7ECCB322CB9429E00558635 /* models */; };
+		D7ECCB3A2CB9BD4A00558635 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = D7ECCB392CB9BD4A00558635 /* HotKey */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7ECCB3A2CB9BD4A00558635 /* HotKey in Frameworks */,
 				40F8347F2CA72482007DAA65 /* whisper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,6 +92,7 @@
 			name = mt;
 			packageProductDependencies = (
 				40F8347E2CA72482007DAA65 /* whisper */,
+				D7ECCB392CB9BD4A00558635 /* HotKey */,
 			);
 			productName = mt;
 			productReference = 40F834672CA70F3A007DAA65 /* mt.app */;
@@ -121,6 +124,7 @@
 			mainGroup = 40F8345E2CA70F3A007DAA65;
 			packageReferences = (
 				40F8347D2CA72482007DAA65 /* XCRemoteSwiftPackageReference "whisper" */,
+				D7ECCB382CB9BD4A00558635 /* XCRemoteSwiftPackageReference "HotKey" */,
 			);
 			productRefGroup = 40F834682CA70F3A007DAA65 /* Products */;
 			projectDirPath = "";
@@ -371,6 +375,14 @@
 				revision = 8feb375fbdf0277ad36958c218c6bf48fa0ba75a;
 			};
 		};
+		D7ECCB382CB9BD4A00558635 /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				kind = exactVersion;
+				version = 0.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -378,6 +390,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 40F8347D2CA72482007DAA65 /* XCRemoteSwiftPackageReference "whisper" */;
 			productName = whisper;
+		};
+		D7ECCB392CB9BD4A00558635 /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7ECCB382CB9BD4A00558635 /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

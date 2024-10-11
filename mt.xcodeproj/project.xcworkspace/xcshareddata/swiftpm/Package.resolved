@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "hotkey",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/soffes/HotKey",
+      "state" : {
+        "revision" : "31234dfbb4330b90ee10d89fbacb77316781cc06",
+        "version" : "0.2.0"
+      }
+    },
+    {
       "identity" : "whisper.cpp",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ggerganov/whisper.cpp",
