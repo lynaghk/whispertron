@@ -50,30 +50,16 @@ actor Recorder {
         print("Native sample rate: \(sampleRate)")
         
         
-        
-        
-        
-        
-        
-        let inputDescription = inputNode.inputFormat(forBus: 0).description
-        let portDescription = inputNode.auAudioUnit.inputBusses[0].supportedChannelLayoutTags
-        
-        print("Input Description: \(inputDescription)")
-        print("Port Description: \(portDescription)")
-        
-    
-        let output = audioEngine.mainMixerNode
-        
-        audioEngine.connect(inputNode, to: output, format: inputNode.inputFormat(forBus: 0))
-        
-        audioEngine.prepare()
-        do {
-            try audioEngine.start()
-            print("Audio echo started")
-        } catch {
-            print("Could not start audio engine: \(error.localizedDescription)")
+        // let output = audioEngine.mainMixerNode
+        // audioEngine.connect(inputNode, to: output, format: inputNode.inputFormat(forBus: 0))
+        // audioEngine.prepare()
+        // do {
+        //     try audioEngine.start()
+        //     print("Audio echo started")
+        // } catch {
+        //     print("Could not start audio engine: \(error.localizedDescription)")
 
-        }
+        // }
 
         
         
@@ -120,14 +106,12 @@ actor Recorder {
     private func processAudio(samples: [Float]) async {
         audioBuffer.append(contentsOf: samples)
         let inputSampleRate = self.inputFormat.sampleRate
-        let whisperSampleRate = Double(WHISPER_SAMPLE_RATE)
-        let chunkDuration = 3.0 // 3 seconds
+        let chunkDuration = 3.0
         let inputChunkSize = Int(inputSampleRate * chunkDuration)
         
         while audioBuffer.count >= inputChunkSize {
             let chunk = Array(audioBuffer.prefix(inputChunkSize))
             audioBuffer.removeFirst(inputChunkSize)
-            
             if let downsampledChunk = downsample(chunk) {
                 await transcribeChunk(downsampledChunk)
             }
@@ -160,7 +144,7 @@ actor Recorder {
     
     private func transcribeChunk(_ chunk: [Float]) async {
         do {
-            try await whisperContext.fullTranscribe(samples: chunk)
+            await whisperContext.fullTranscribe(samples: chunk)
             let transcription = await whisperContext.getTranscription()
             print("Transcription: \(transcription)")
         } catch {

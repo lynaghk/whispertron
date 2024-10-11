@@ -1,10 +1,37 @@
 * log
+** whisper streaming
+https://github.com/ufal/whisper_streaming
+
+
+wasn't able to run faster-whisper backend because 
+
+    ValueError: This CTranslate2 package was not compiled with CUDA support
+
+uv add whisper-timestamped
+
+uv run whisper_online_server.py --model base.en --backend whisper_timestamped
+
+ffmpeg -hide_banner -f avfoundation -list_devices true -i ""
+ffmpeg -hide_banner -f avfoundation -i ":1" -ac 1 -ar 16000 -f s16le -loglevel error - | nc localhost 43007
+
+unfortunately I kept running into this error after connecting and speaking for a few seconds.
+Maybe the backend is busted somehow?
+I'm able to capture data via ffmpeg from my mic, so that's not it.
+
+  File "/Users/dev/software/whisper_streaming/.venv/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1616, in _call_impl
+    hook_result = hook(self, args, result)
+  File "/Users/dev/software/whisper_streaming/.venv/lib/python3.9/site-packages/whisper_timestamped/transcribe.py", line 882, in <lambda>
+    lambda layer, ins, outs, index=j: hook_attention_weights(layer, ins, outs, index))
+  File "/Users/dev/software/whisper_streaming/.venv/lib/python3.9/site-packages/whisper_timestamped/transcribe.py", line 777, in hook_attention_weights
+    if w.shape[-2] > 1:
+AttributeError: 'NoneType' object has no attribute 'shape'
+
+
 ** whisper.cpp
 
 bash ./models/download-ggml-model.sh base.en
 
-
-
 brew install sdl
 make stream
 ./stream -m ./models/ggml-base.en.bin -t 8 --step 500 --length 5000
+

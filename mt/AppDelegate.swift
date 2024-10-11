@@ -48,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let modelPath = model_url?.path {
             Task {
                 do {
-                    self.whisperContext = try await WhisperContext.createContext(path: modelPath)
+                    self.whisperContext = try WhisperContext.createContext(path: modelPath)
                     self.recorder = try await Recorder(whisperContext: self.whisperContext!)
                     logger.info("Whisper context and recorder created successfully")
                 } catch {
