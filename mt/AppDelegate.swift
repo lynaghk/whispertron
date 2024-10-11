@@ -9,6 +9,7 @@ import Cocoa
 import SwiftUI
 import Foundation
 import os
+import AVFoundation
 
 struct SwiftUIView: View {
     var body: some View {
@@ -20,6 +21,7 @@ struct SwiftUIView: View {
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var whisperContext: WhisperContext?
+    private var recorder: Recorder?
     
     // Create a logger
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
@@ -29,6 +31,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let recordingImage = NSImage(systemSymbolName: "circle.fill", accessibilityDescription: "Recording")
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        
+        
+        
+        
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
@@ -42,8 +48,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let modelPath = model_url?.path {
             Task {
                 do {
-                    self.whisperContext = try WhisperContext.createContext(path: modelPath)
-                    logger.info("Whisper context created successfully")
+                    self.whisperContext = try await WhisperContext.createContext(path: modelPath)
+                    self.recorder = try await Recorder(whisperContext: self.whisperContext!)
+                    logger.info("Whisper context and recorder created successfully")
                 } catch {
                     logger.error("Error creating Whisper context: \(error.localizedDescription)")
                 }
@@ -56,17 +63,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupMenus() {
         let menu = NSMenu()
 
-        let one = NSMenuItem(title: "Standby", action: #selector(didTapStandby) , keyEquivalent: "1")
-        menu.addItem(one)
+        let standby = NSMenuItem(title: "Standby", action: #selector(didTapStandby) , keyEquivalent: "1")
+        menu.addItem(standby)
 
-        let two = NSMenuItem(title: "Recording", action: #selector(didTapRecording) , keyEquivalent: "2")
-        menu.addItem(two)
+        let recording = NSMenuItem(title: "Recording", action: #selector(didTapRecording) , keyEquivalent: "2")
+        menu.addItem(recording)
 
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
-        // 3
+
         statusItem.menu = menu
     }
     
@@ -75,6 +82,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.image = standbyImage
         }
         logger.debug("didTapStandby")
+        
+        Task {
+            await recorder?.stopRecording()
+        }
     }
 
     @objc func didTapRecording() {
@@ -82,7 +93,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.image = recordingImage
         }
         logger.debug("didTapRecording")
+        
+        Task {
+            do {
+                try await recorder?.startRecording()
+            } catch {
+                logger.error("Error starting recording: \(error.localizedDescription)")
+            }
+        }
     }
-
 
 }
