@@ -18,8 +18,7 @@ actor Recorder {
     private var whisperContext: WhisperContext
     private var inputNode: AVAudioInputNode
     private var bufferSize: AVAudioFrameCount = 1024
-    //private var sampleRate: Double = 16000.0
-    private var sampleRate: Double = Double(WHISPER_SAMPLE_RATE)
+
     private var audioBuffer: [Float] = []
     private var inputFormat: AVAudioFormat
     private var converter: AVAudioConverter?
@@ -47,8 +46,6 @@ actor Recorder {
         
         self.inputFormat = self.inputNode.inputFormat(forBus: 0)
 
-        print("Native sample rate: \(sampleRate)")
-        
         
         // let output = audioEngine.mainMixerNode
         // audioEngine.connect(inputNode, to: output, format: inputNode.inputFormat(forBus: 0))
@@ -69,7 +66,7 @@ actor Recorder {
     }
     
     func startRecording() throws {
-        let sampleRate = self.inputFormat.sampleRate
+        let sampleRate = inputFormat.sampleRate
         let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: 1, interleaved: false)
         
         inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: format) { [weak self] buffer, _ in
@@ -99,24 +96,18 @@ actor Recorder {
     func stopRecording() {
         audioEngine.stop()
         inputNode.removeTap(onBus: 0)
-        audioBuffer.removeAll()
+        Task {
+            await transcribe(audioBuffer)
+            audioBuffer.removeAll()
+        }
         print("Stopped recording")
     }
     
     private func processAudio(samples: [Float]) async {
-        audioBuffer.append(contentsOf: samples)
-        let inputSampleRate = self.inputFormat.sampleRate
-        let chunkDuration = 3.0
-        let inputChunkSize = Int(inputSampleRate * chunkDuration)
-        
-        while audioBuffer.count >= inputChunkSize {
-            let chunk = Array(audioBuffer.prefix(inputChunkSize))
-            audioBuffer.removeFirst(inputChunkSize)
-            if let downsampledChunk = downsample(chunk) {
-                await transcribeChunk(downsampledChunk)
+            if let downsampledChunk = downsample(samples) {
+                audioBuffer.append(contentsOf: downsampledChunk)
             }
         }
-    }
     
     private func downsample(_ samples: [Float]) -> [Float]? {
         guard let converter = converter else { return nil }
@@ -142,9 +133,9 @@ actor Recorder {
         return Array(downsampledData)
     }
     
-    private func transcribeChunk(_ chunk: [Float]) async {
+    private func transcribe(_ samples: [Float]) async {
         do {
-            await whisperContext.fullTranscribe(samples: chunk)
+            await whisperContext.fullTranscribe(samples: samples)
             let transcription = await whisperContext.getTranscription()
             print("Transcription: \(transcription)")
         } catch {
