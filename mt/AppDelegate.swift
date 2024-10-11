@@ -8,6 +8,7 @@
 import Cocoa
 import SwiftUI
 import Foundation
+import os
 
 struct SwiftUIView: View {
     var body: some View {
@@ -20,11 +21,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var whisperContext: WhisperContext?
     
+    // Create a logger
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
+    
+    // Create NSImage properties
+    private let standbyImage = NSImage(systemSymbolName: "circle", accessibilityDescription: "Standby")
+    private let recordingImage = NSImage(systemSymbolName: "circle.fill", accessibilityDescription: "Recording")
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "1.circle", accessibilityDescription: "1")
+            button.image = standbyImage
         }
         
         setupMenus()
@@ -34,28 +42,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let modelPath = model_url?.path {
             Task {
                 do {
-                    self.whisperContext = try await WhisperContext.createContext(path: modelPath)
-                    print("Whisper context created successfully")
+                    self.whisperContext = try WhisperContext.createContext(path: modelPath)
+                    logger.info("Whisper context created successfully")
                 } catch {
-                    print("Error creating Whisper context: \(error)")
+                    logger.error("Error creating Whisper context: \(error.localizedDescription)")
                 }
             }
         } else {
-            print("Error: Could not find the model file")
+            logger.error("Could not find the model file")
         }
     }
     
     func setupMenus() {
         let menu = NSMenu()
 
-        let one = NSMenuItem(title: "One", action: #selector(didTapOne) , keyEquivalent: "1")
+        let one = NSMenuItem(title: "Standby", action: #selector(didTapStandby) , keyEquivalent: "1")
         menu.addItem(one)
 
-        let two = NSMenuItem(title: "Two", action: #selector(didTapTwo) , keyEquivalent: "2")
+        let two = NSMenuItem(title: "Recording", action: #selector(didTapRecording) , keyEquivalent: "2")
         menu.addItem(two)
-
-        let three = NSMenuItem(title: "Three", action: #selector(didTapThree) , keyEquivalent: "3")
-        menu.addItem(three)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -65,22 +70,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.menu = menu
     }
     
-    private func changeStatusBarButton(number: Int) {
+    @objc func didTapStandby() {
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "\(number).circle", accessibilityDescription: number.description)
+            button.image = standbyImage
         }
+        logger.debug("didTapStandby")
     }
 
-    @objc func didTapOne() {
-        changeStatusBarButton(number: 1)
-        print("didTapOne")
+    @objc func didTapRecording() {
+        if let button = statusItem.button {
+            button.image = recordingImage
+        }
+        logger.debug("didTapRecording")
     }
 
-    @objc func didTapTwo() {
-        changeStatusBarButton(number: 2)
-    }
 
-    @objc func didTapThree() {
-        changeStatusBarButton(number: 3)
-    }
 }

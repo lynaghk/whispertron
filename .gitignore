@@ -9,3 +9,4 @@ xcuserdata/
 *.dSYM
 
 models/
+build/
