@@ -17,4 +17,6 @@ fi
 xcodebuild -project whispertron.xcodeproj -scheme whispertron -configuration Release build ARCHS=arm64
 
 echo "try running:\n"
-echo "open ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app"
+echo "    open ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app"
+echo "or"
+echo "    cp -rf ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app /Applications/"
