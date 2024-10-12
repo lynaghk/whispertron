@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "40F834662CA70F3A007DAA65"
-               BuildableName = "mt.app"
-               BlueprintName = "mt"
-               ReferencedContainer = "container:mt.xcodeproj">
+               BuildableName = "whispertron.app"
+               BlueprintName = "whispertron"
+               ReferencedContainer = "container:whispertron.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "40F834662CA70F3A007DAA65"
-            BuildableName = "mt.app"
-            BlueprintName = "mt"
-            ReferencedContainer = "container:mt.xcodeproj">
+            BuildableName = "whispertron.app"
+            BlueprintName = "whispertron"
+            ReferencedContainer = "container:whispertron.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "40F834662CA70F3A007DAA65"
-            BuildableName = "mt.app"
-            BlueprintName = "mt"
-            ReferencedContainer = "container:mt.xcodeproj">
+            BuildableName = "whispertron.app"
+            BlueprintName = "whispertron"
+            ReferencedContainer = "container:whispertron.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -1,10 +1,11 @@
 #!/bin/sh
 
+set -e
 
 cd "$(dirname "$0")"
 
-mkdir -p mt/models/
-FILE_PATH=mt/models/ggml-base.en.bin
+mkdir -p whispertron/models/
+FILE_PATH=whispertron/models/ggml-base.en.bin
 
 if [ -f "$FILE_PATH" ]; then
     echo "Whisper model already downloaded."
@@ -13,7 +14,7 @@ else
 fi
 
 
-xcodebuild -project mt.xcodeproj -scheme mt -configuration Release build ARCHS=arm64
+xcodebuild -project whispertron.xcodeproj -scheme whispertron -configuration Release build ARCHS=arm64
 
 echo "try running:\n"
-echo "open ~/Library/Developer/Xcode/DerivedData/mt-*/Build/Products/Release/mt.app"
+echo "open ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app"

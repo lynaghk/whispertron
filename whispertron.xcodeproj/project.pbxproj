@@ -19,16 +19,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		40F834672CA70F3A007DAA65 /* mt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		40F834672CA70F3A007DAA65 /* whispertron.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = whispertron.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40F8346A2CA70F3A007DAA65 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		40F8346C2CA70F3A007DAA65 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		40F8346E2CA70F3B007DAA65 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		40F834732CA70F3B007DAA65 /* mt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = mt.entitlements; sourceTree = "<group>"; };
 		40F8347B2CA71E4E007DAA65 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		40F834802CA724C8007DAA65 /* LibWhisper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibWhisper.swift; sourceTree = "<group>"; };
 		40F834822CA72889007DAA65 /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
-		D7195B7D2CBAB917005757F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		D7ECCB322CB9429E00558635 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = mt/models; sourceTree = "<group>"; };
+		D7C3BEB12CBACF0E00AEB012 /* whispertron.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = whispertron.entitlements; sourceTree = "<group>"; };
+		D7ECCB322CB9429E00558635 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = whispertron/models; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,7 +47,7 @@
 			isa = PBXGroup;
 			children = (
 				D7ECCB322CB9429E00558635 /* models */,
-				40F834692CA70F3A007DAA65 /* mt */,
+				40F834692CA70F3A007DAA65 /* whispertron */,
 				40F834682CA70F3A007DAA65 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -56,32 +55,31 @@
 		40F834682CA70F3A007DAA65 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				40F834672CA70F3A007DAA65 /* mt.app */,
+				40F834672CA70F3A007DAA65 /* whispertron.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		40F834692CA70F3A007DAA65 /* mt */ = {
+		40F834692CA70F3A007DAA65 /* whispertron */ = {
 			isa = PBXGroup;
 			children = (
-				D7195B7D2CBAB917005757F7 /* Info.plist */,
 				40F8347B2CA71E4E007DAA65 /* main.swift */,
 				40F8346A2CA70F3A007DAA65 /* AppDelegate.swift */,
 				40F8346C2CA70F3A007DAA65 /* ViewController.swift */,
 				40F8346E2CA70F3B007DAA65 /* Assets.xcassets */,
-				40F834732CA70F3B007DAA65 /* mt.entitlements */,
 				40F834802CA724C8007DAA65 /* LibWhisper.swift */,
 				40F834822CA72889007DAA65 /* Recorder.swift */,
+				D7C3BEB12CBACF0E00AEB012 /* whispertron.entitlements */,
 			);
-			path = mt;
+			path = whispertron;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		40F834662CA70F3A007DAA65 /* mt */ = {
+		40F834662CA70F3A007DAA65 /* whispertron */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 40F834762CA70F3B007DAA65 /* Build configuration list for PBXNativeTarget "mt" */;
+			buildConfigurationList = 40F834762CA70F3B007DAA65 /* Build configuration list for PBXNativeTarget "whispertron" */;
 			buildPhases = (
 				40F834632CA70F3A007DAA65 /* Sources */,
 				40F834642CA70F3A007DAA65 /* Frameworks */,
@@ -91,13 +89,13 @@
 			);
 			dependencies = (
 			);
-			name = mt;
+			name = whispertron;
 			packageProductDependencies = (
 				40F8347E2CA72482007DAA65 /* whisper */,
 				D7ECCB392CB9BD4A00558635 /* HotKey */,
 			);
 			productName = mt;
-			productReference = 40F834672CA70F3A007DAA65 /* mt.app */;
+			productReference = 40F834672CA70F3A007DAA65 /* whispertron.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -115,7 +113,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 40F834622CA70F3A007DAA65 /* Build configuration list for PBXProject "mt" */;
+			buildConfigurationList = 40F834622CA70F3A007DAA65 /* Build configuration list for PBXProject "whispertron" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -132,7 +130,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				40F834662CA70F3A007DAA65 /* mt */,
+				40F834662CA70F3A007DAA65 /* whispertron */,
 			);
 		};
 /* End PBXProject section */
@@ -288,15 +286,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = mt/mt.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6YNN5TZFQY;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = mt/Info.plist;
+				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This app requires access to accessibility features to determine whether a text input is focused.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -322,15 +320,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = mt/mt.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6YNN5TZFQY;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = mt/Info.plist;
+				INFOPLIST_FILE = "";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This app requires access to accessibility features to determine whether a text input is focused.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -354,7 +352,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		40F834622CA70F3A007DAA65 /* Build configuration list for PBXProject "mt" */ = {
+		40F834622CA70F3A007DAA65 /* Build configuration list for PBXProject "whispertron" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				40F834742CA70F3B007DAA65 /* Debug */,
@@ -363,7 +361,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		40F834762CA70F3B007DAA65 /* Build configuration list for PBXNativeTarget "mt" */ = {
+		40F834762CA70F3B007DAA65 /* Build configuration list for PBXNativeTarget "whispertron" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				40F834772CA70F3B007DAA65 /* Debug */,
