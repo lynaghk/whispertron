@@ -1,4 +1,36 @@
 * log
+** 2024 oct 12 - mac text insertion
+
+    func insertStringAtCursor(_ string: String) {
+        let systemWideElement = AXUIElementCreateSystemWide()
+        
+        var focusedElement: AnyObject?
+        let result = AXUIElementCopyAttributeValue(systemWideElement, kAXFocusedUIElementAttribute as CFString, &focusedElement)
+        
+        if result != .success {
+            logger.error("Error getting focused element: \(result.rawValue)")
+            return
+        }
+
+        let element = focusedElement as! AXUIElement
+
+        var value: AnyObject?
+        AXUIElementCopyAttributeValue(element, kAXValueAttribute as CFString, &value)
+
+        if let currentValue = value as? String {
+            let newValue = currentValue + string
+            AXUIElementSetAttributeValue(element, kAXValueAttribute as CFString, newValue as CFTypeRef)
+        } else {
+            AXUIElementSetAttributeValue(element, kAXValueAttribute as CFString, string as CFTypeRef)
+        }
+    }
+
+
+trying to use the accessibility API like this doesn't work for Cursor or other apps that have custom text input thingies.
+I think I might need to just generate keypress events?
+
+ahh, found something that worked in https://github.com/espanso/espanso/blob/6b380d1edd94dff6505d97039ccb59c00ae1c5f4/espanso-inject/src/mac/native.mm#L30
+
 ** whisper streaming
 https://github.com/ufal/whisper_streaming
 

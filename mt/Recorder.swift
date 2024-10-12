@@ -90,17 +90,17 @@ actor Recorder {
             throw RecorderError.audioEngineError("Could not start audio engine: \(error.localizedDescription)")
         }
         
-        print("Started recording")
+        logger.info("Started recording")
     }
     
-    func stopRecording() {
+    func stopRecording() async -> String? {
         audioEngine.stop()
         inputNode.removeTap(onBus: 0)
-        Task {
-            await transcribe(audioBuffer)
-            audioBuffer.removeAll()
-        }
-        print("Stopped recording")
+        logger.info("Stopped recording, transcribing...")
+
+        let transcription = await transcribe(audioBuffer)
+        audioBuffer.removeAll()
+        return transcription
     }
     
     private func processAudio(samples: [Float]) async {
@@ -125,7 +125,7 @@ actor Recorder {
         }
         
         guard status != .error, error == nil else {
-            print("Conversion failed: \(error?.localizedDescription ?? "Unknown error")")
+            logger.error("Conversion failed: \(error?.localizedDescription ?? "Unknown error")")
             return nil
         }
         
@@ -133,13 +133,13 @@ actor Recorder {
         return Array(downsampledData)
     }
     
-    private func transcribe(_ samples: [Float]) async {
+    private func transcribe(_ samples: [Float]) async -> String? {
         do {
             await whisperContext.fullTranscribe(samples: samples)
-            let transcription = await whisperContext.getTranscription()
-            print("Transcription: \(transcription)")
+            return await whisperContext.getTranscription()
         } catch {
-            print("Error transcribing audio: \(error.localizedDescription)")
+            logger.error("Error transcribing audio: \(error.localizedDescription)")
+            return nil
         }
     }
 }
