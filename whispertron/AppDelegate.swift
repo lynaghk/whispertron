@@ -40,16 +40,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             logger.error("Could not find the model file")
             return
         }
-
-
-        let notification = NSUserNotification()
-        notification.title = "Hello"
-        notification.informativeText = "This is a popup notification."
         
-        let notificationCenter = NSUserNotificationCenter.default
-        notificationCenter.deliver(notification)
-
-
         Task {
             do {
                 self.whisperContext = try WhisperContext.createContext(path: modelPath)
@@ -109,7 +100,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         feedbackWindow?.contentView?.addSubview(feedbackTextField!)
     }
     
-    func show_feedback(_ text: String?) {
+    func showFeedback(_ text: String?) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }      
             if let text = text {
@@ -156,23 +147,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func didTapStandby() {
         logger.debug("didTapStandby")
         statusItem.button?.image = standbyImage
-        show_feedback("transcribing...")
+        showFeedback("transcribing...")
         Task {
             guard let transcript = await recorder?.stopRecording() else {
                 logger.debug("No transcript to copy")
-                show_feedback(nil)
+                showFeedback(nil)
                 return
             }
             // NSPasteboard.general.clearContents()
             // NSPasteboard.general.setString(transcript, forType: .string)
             self.insertStringAtCursor(transcript)
-            show_feedback(nil)
+            showFeedback(nil)
         }
     }
     
     @objc func didTapRecording() {
         logger.debug("didTapRecording")
-        show_feedback("recording")
+        showFeedback("recording")
 
         //statusItem.button?.performClick(nil)
         statusItem.button?.image = recordingImage
