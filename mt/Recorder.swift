@@ -59,7 +59,6 @@ actor Recorder {
         // }
 
         
-        
         let inputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: self.inputFormat.sampleRate, channels: 1, interleaved: false)!
         let outputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: Double(WHISPER_SAMPLE_RATE), channels: 1, interleaved: false)!
         self.converter = AVAudioConverter(from: inputFormat, to: outputFormat)

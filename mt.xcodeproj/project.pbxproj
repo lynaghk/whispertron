@@ -27,6 +27,7 @@
 		40F8347B2CA71E4E007DAA65 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		40F834802CA724C8007DAA65 /* LibWhisper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibWhisper.swift; sourceTree = "<group>"; };
 		40F834822CA72889007DAA65 /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
+		D7195B7D2CBAB917005757F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D7ECCB322CB9429E00558635 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = mt/models; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,6 +64,7 @@
 		40F834692CA70F3A007DAA65 /* mt */ = {
 			isa = PBXGroup;
 			children = (
+				D7195B7D2CBAB917005757F7 /* Info.plist */,
 				40F8347B2CA71E4E007DAA65 /* main.swift */,
 				40F8346A2CA70F3A007DAA65 /* AppDelegate.swift */,
 				40F8346C2CA70F3A007DAA65 /* ViewController.swift */,
@@ -294,6 +296,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6YNN5TZFQY;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = mt/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This app requires access to accessibility features to determine whether a text input is focused.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -327,6 +330,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6YNN5TZFQY;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = mt/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This app requires access to accessibility features to determine whether a text input is focused.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
