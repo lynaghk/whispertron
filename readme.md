@@ -12,7 +12,7 @@ Then:
 - give it accessibility permissions
 - run it
 
-Hold down Command-Shift-H, say something, release Command-Shift-H, watch text appear.
+Hold down Control-Shift-H, say something, release Control-Shift-H, watch text appear.
 
 I'm open to pairing or PRs that:
 
