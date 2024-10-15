@@ -1,5 +1,42 @@
-* log
-** 2024 oct 12 - mac text insertion
+My own lil' dictation app. For details see: [Making a dictation app in a weekend](https://kevinlynagh.com/newsletter/2024_10_transcription_app_art_wall/).
+
+Works on my M1 MacBook Air running MacOS 12.7 with XCode 14.2.
+
+Run:
+
+    ./build.sh
+
+Then:
+
+- copy the app to your `/Applications/` folder
+- give it accessibility permissions
+- run it
+
+Hold down Command-Shift-H, say something, release Command-Shift-H, watch text appear.
+
+I'm open to pairing or PRs that:
+
+- add a single preferences window that allows you to configure the global activation hotkey
+- make it easier for other people to build (is it possible without XCode?)
+- graphically select and download Whisper models besides the base English one
+- implement live transcription with a prinicpled approah like [Whisper Streaming](https://github.com/ufal/whisper_streaming/) (I assume it's good based on the video demos, but couldn't run it myself because, lol, [Python dependencies](https://github.com/ufal/whisper_streaming/issues/129))
+
+I'm not interested in PRs related to:
+
+- other operating systems or MacOS versions (I don't use them!)
+- Best Practices. The only continuous integration I'm doing is using the app myself =D
+
+
+Shout out to:
+
+- [ggerganov/whisper.cpp: Port of OpenAI's Whisper model in C/C++](https://github.com/ggerganov/whisper.cpp)
+- Espanso for figuring out how to [inject text in any app](https://github.com/espanso/espanso/blob/6b380d1edd94dff6505d97039ccb59c00ae1c5f4/espanso-inject/src/mac/native.mm#L30)
+
+Have a great day!
+
+
+# log
+## 2024 oct 12 - mac text insertion
 
     func insertStringAtCursor(_ string: String) {
         let systemWideElement = AXUIElementCreateSystemWide()
@@ -31,7 +68,7 @@ I think I might need to just generate keypress events?
 
 ahh, found something that worked in https://github.com/espanso/espanso/blob/6b380d1edd94dff6505d97039ccb59c00ae1c5f4/espanso-inject/src/mac/native.mm#L30
 
-** whisper streaming
+## whisper streaming
 https://github.com/ufal/whisper_streaming
 
 
@@ -59,7 +96,7 @@ I'm able to capture data via ffmpeg from my mic, so that's not it.
 AttributeError: 'NoneType' object has no attribute 'shape'
 
 
-** whisper.cpp
+## whisper.cpp
 
 bash ./models/download-ggml-model.sh base.en
 
