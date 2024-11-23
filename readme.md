@@ -20,6 +20,7 @@ I'm open to pairing or PRs that:
 - make it easier for other people to build (is it possible without XCode?)
 - graphically select and download Whisper models besides the base English one
 - implement live transcription with a prinicpled approah like [Whisper Streaming](https://github.com/ufal/whisper_streaming/) (I assume it's good based on the video demos, but couldn't run it myself because, lol, [Python dependencies](https://github.com/ufal/whisper_streaming/issues/129))
+- add a simple CLI that makes it easy to, e.g., get rough transcription of long, unchaptered YouTube videos so you can jump to parts.
 
 I'm not interested in PRs related to:
 
