@@ -40,7 +40,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     guard
       let modelPath = Bundle.main.url(
-        forResource: "ggml-base.en", withExtension: "bin", subdirectory: "models")?.path
+        forResource: "model", withExtension: "bin", subdirectory: "models")?.path
     else {
       logger.error("Could not find the model file")
       return
