@@ -146,7 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @objc func openAbout() {
-    if let url = URL(string: "https://www.github.com/lynaghk") {
+    if let url = URL(string: "https://www.github.com/lynaghk/whispertron") {
       NSWorkspace.shared.open(url)
     }
   }
