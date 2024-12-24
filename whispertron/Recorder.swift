@@ -145,6 +145,6 @@ actor Recorder {
   func transcribe() async -> String {
     await whisperContext.fullTranscribe(samples: audioBuffer)
     audioBuffer.removeAll()
-    return await whisperContext.getTranscription()
+    return await whisperContext.getTranscription().trimmingCharacters(in: .whitespaces)
   }
 }
