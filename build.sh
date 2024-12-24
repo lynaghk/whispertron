@@ -19,7 +19,14 @@ fi
 
 xcodebuild -project whispertron.xcodeproj -scheme whispertron -configuration Release build ARCHS=arm64
 
-echo "try running:\n"
+echo "you'll probably need to reset accessibility permissions before the build will work:"
+echo ""
+echo "    tccutil reset Accessibility com.keminglabs.whispertron"
+echo ""
+echo "then try running:"
+echo ""
 echo "    open ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app"
-echo "or"
-echo "    cp -rf ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app /Applications/"
+echo ""
+echo "or copy to your app folder for usage:"
+echo ""
+echo "    ditto ~/Library/Developer/Xcode/DerivedData/whispertron-*/Build/Products/Release/whispertron.app /Applications/whispertron.app"
