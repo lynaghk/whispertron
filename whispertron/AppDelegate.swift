@@ -32,6 +32,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       self?.didTapStandby()
     }
 
+    // Configure audio session
+    configureAudioSession()
+
     setupFeedbackWindow()
 
     statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -55,6 +58,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         logger.error("Error creating Whisper context: \(error.localizedDescription)")
       }
     }
+  }
+
+  private func configureAudioSession() {
+    // On macOS, we rely on AVAudioEngine to handle device changes,
+    // which is implemented in Recorder.swift
+    logger.info("Audio session configuration for macOS")
   }
 
   // Translated from espanso's injectString function

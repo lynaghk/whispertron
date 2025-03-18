@@ -1,5 +1,6 @@
 import AVFAudio
 import AVFoundation
+import AppKit
 import CoreAudio
 import Foundation
 import os
@@ -23,6 +24,8 @@ actor Recorder {
   private var audioBuffer: [Float] = []
   private var inputFormat: AVAudioFormat
   private var converter: AVAudioConverter?
+  private var isRecording = false
+  private var deviceChangeObservers: [NSObjectProtocol] = []
 
   private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Recorder")
 
@@ -43,7 +46,9 @@ actor Recorder {
       throw RecorderError.audioEngineError("Microphone permission denied")
     }
 
+    // Always use the hardware format directly
     self.inputFormat = self.inputNode.inputFormat(forBus: 0)
+      logger.info("Input hardware format: \(self.inputFormat.sampleRate) Hz")
 
     // let output = audioEngine.mainMixerNode
     // audioEngine.connect(inputNode, to: output, format: inputNode.inputFormat(forBus: 0))
@@ -56,21 +61,119 @@ actor Recorder {
 
     // }
 
-    let inputFormat = AVAudioFormat(
-      commonFormat: .pcmFormatFloat32, sampleRate: self.inputFormat.sampleRate, channels: 1,
-      interleaved: false)!
+    // Create converter to handle resampling to whisper model's expected format
     let outputFormat = AVAudioFormat(
       commonFormat: .pcmFormatFloat32, sampleRate: whisperSampleRate, channels: 1,
       interleaved: false)!
-    self.converter = AVAudioConverter(from: inputFormat, to: outputFormat)
+
+    if inputFormat.sampleRate != whisperSampleRate {
+        logger.info("Creating converter from \(self.inputFormat.sampleRate) Hz to \(self.whisperSampleRate) Hz")
+      self.converter = AVAudioConverter(from: inputFormat, to: outputFormat)
+    } else {
+      logger.info("No converter needed, formats match")
+    }
+
+    // Setup device change notification
+    setupDeviceChangeListener()
+  }
+
+  private func setupDeviceChangeListener() {
+    let notificationCenter = NotificationCenter.default
+
+    // On macOS, we need to listen for system waking from sleep
+    let wakeObserver = notificationCenter.addObserver(
+      forName: NSWorkspace.didWakeNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      guard let self = self else { return }
+      Task {
+        await self.handleDeviceChange()
+      }
+    }
+    deviceChangeObservers.append(wakeObserver)
+
+    // CoreAudio device property changes
+    let devicePropertyObserver = notificationCenter.addObserver(
+      forName: NSNotification.Name(rawValue: "com.apple.audio.CoreAudio.DevicePropertyChanged"),
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      guard let self = self else { return }
+      Task {
+        await self.handleDeviceChange()
+      }
+    }
+    deviceChangeObservers.append(devicePropertyObserver)
+
+    // CoreAudio device list changes
+    let deviceListObserver = notificationCenter.addObserver(
+      forName: NSNotification.Name(rawValue: "com.apple.audio.CoreAudio.DeviceListChanged"),
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      guard let self = self else { return }
+      Task {
+        await self.handleDeviceChange()
+      }
+    }
+    deviceChangeObservers.append(deviceListObserver)
+
+    logger.info("Audio device change listeners configured")
+  }
+
+  private func handleDeviceChange() async {
+    logger.info("Audio device change detected")
+
+    // If we're recording when the device changes, we need to restart the recording
+    if isRecording {
+      do {
+        // Stop current recording
+        audioEngine.stop()
+        inputNode.removeTap(onBus: 0)
+
+        // Wait a bit for the system to complete the device change
+        try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
+
+        // Reinitialize the audio engine and restart recording
+        audioEngine = AVAudioEngine()
+        inputNode = audioEngine.inputNode
+
+        // IMPORTANT: Get fresh input format from the new hardware device
+        inputFormat = inputNode.inputFormat(forBus: 0)
+          logger.info("New input format sample rate: \(self.inputFormat.sampleRate)")
+
+        // Create new converter with the updated input format
+        let inputFormatForConverter = AVAudioFormat(
+          commonFormat: .pcmFormatFloat32, sampleRate: inputFormat.sampleRate, channels: 1,
+          interleaved: false)!
+        let outputFormat = AVAudioFormat(
+          commonFormat: .pcmFormatFloat32, sampleRate: whisperSampleRate, channels: 1,
+          interleaved: false)!
+
+        // Only create a new converter if the sample rates are different
+        if inputFormat.sampleRate != whisperSampleRate {
+          converter = AVAudioConverter(from: inputFormatForConverter, to: outputFormat)
+        }
+
+        // Restart recording
+        try startRecording()
+        logger.info("Successfully restarted recording after device change")
+      } catch {
+        logger.error(
+          "Failed to restart recording after device change: \(error.localizedDescription)")
+      }
+    }
   }
 
   func startRecording() throws {
-    let sampleRate = inputFormat.sampleRate
-    let format = AVAudioFormat(
-      commonFormat: .pcmFormatFloat32, sampleRate: sampleRate, channels: 1, interleaved: false)
+    // Always use the hardware input format directly
+    // This ensures we match the hardware sample rate exactly
+    let hardwareFormat = inputNode.inputFormat(forBus: 0)
 
-    inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: format) {
+    logger.info("Starting recording with format: \(hardwareFormat.sampleRate) Hz")
+
+    inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: hardwareFormat) {
       [weak self] buffer, _ in
       guard let self = self else { return }
       let channelData = buffer.floatChannelData?[0]
@@ -88,6 +191,7 @@ actor Recorder {
 
     do {
       try audioEngine.start()
+      isRecording = true
     } catch {
       throw RecorderError.audioEngineError(
         "Could not start audio engine: \(error.localizedDescription)")
@@ -105,7 +209,14 @@ actor Recorder {
   func stopRecording() {
     audioEngine.stop()
     inputNode.removeTap(onBus: 0)
+    isRecording = false
     logger.info("Stopped recording, transcribing...")
+  }
+
+  deinit {
+    for observer in deviceChangeObservers {
+      NotificationCenter.default.removeObserver(observer)
+    }
   }
 
   func recordedDurationSeconds() -> Double {
@@ -113,7 +224,18 @@ actor Recorder {
   }
 
   private func downsample(_ samples: [Float]) -> [Float]? {
-    guard let converter = converter else { return nil }
+    // If input format already matches whisper sample rate, no conversion needed
+    if inputFormat.sampleRate == whisperSampleRate {
+      return samples
+    }
+
+    // Otherwise use the converter
+    guard let converter = converter else {
+      logger.error(
+        "Converter is nil but formats don't match: \(self.inputFormat.sampleRate) vs \(self.whisperSampleRate)"
+      )
+      return nil
+    }
 
     let inputBuffer = AVAudioPCMBuffer(
       pcmFormat: converter.inputFormat, frameCapacity: AVAudioFrameCount(samples.count))!
