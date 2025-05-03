@@ -10,3 +10,6 @@ xcuserdata/
 
 models/
 build/
+
+whisper_xcframework/
+whisper-v1.7.5-xcframework.zip

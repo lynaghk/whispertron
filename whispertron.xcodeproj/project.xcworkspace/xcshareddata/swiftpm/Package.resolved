@@ -1,4 +1,5 @@
 {
+  "originHash" : "01f286328852d165d87f8fbee99b01f9c2c936f57ac234f76396f74f9d2496dd",
   "pins" : [
     {
       "identity" : "hotkey",
@@ -8,15 +9,7 @@
         "revision" : "31234dfbb4330b90ee10d89fbacb77316781cc06",
         "version" : "0.2.0"
       }
-    },
-    {
-      "identity" : "whisper.cpp",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ggerganov/whisper.cpp",
-      "state" : {
-        "revision" : "8feb375fbdf0277ad36958c218c6bf48fa0ba75a"
-      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

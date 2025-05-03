@@ -1,6 +1,9 @@
 My own lil' dictation app. For details see: [Making a dictation app in a weekend](https://kevinlynagh.com/newsletter/2024_10_transcription_app_art_wall/).
 
-Works on my M1 MacBook Air running MacOS 12.7 with XCode 14.2.
+Works on my:
+
+- M1 MacBook Air running MacOS 14.7.5 with XCode 16.1.
+- M4 Mac Mini running MacOS 15.1.1 with XCode 16.2.
 
 Run:
 
@@ -39,6 +42,12 @@ Have a great day!
 
 
 # log
+
+## 2025 May 3 - updated to latest Whisper.cpp
+
+This should be faster than the previous version, since now Whisper.cpp uses Metal on MacOS.
+It feels a bit snappier on my M1 Air, so I'm happy.
+
 ## 2024 oct 12 - mac text insertion
 
     func insertStringAtCursor(_ string: String) {

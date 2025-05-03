@@ -34,7 +34,6 @@ actor WhisperContext {
       params.offset_ms = 0
       params.no_context = true
       params.single_segment = false
-      params.suppress_non_speech_tokens = true
 
       whisper_reset_timings(context)
       print("About to run whisper_full")

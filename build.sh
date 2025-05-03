@@ -8,14 +8,21 @@ mkdir -p whispertron/models/
 #MODEL="ggml-base.en"
 #MODEL="ggml-large-v3-turbo-q5_0"
 MODEL="ggml-small.en-q5_1"
-FILE_PATH="whispertron/models/model.bin"
 
+FILE_PATH="whispertron/models/model.bin"
 if [ -f "$FILE_PATH" ]; then
     echo "Whisper model already downloaded."
 else
     wget -O "$FILE_PATH" "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL.bin?download=true"
 fi
 
+FILE_PATH="whisper-v1.7.5-xcframework.zip"
+if [ -f "$FILE_PATH" ]; then
+    echo "Whisper framework already downloaded."
+else
+    wget -O "$FILE_PATH" "https://github.com/ggml-org/whisper.cpp/releases/download/v1.7.5/whisper-v1.7.5-xcframework.zip"
+    unzip -d whisper_xcframework whisper-v1.7.5-xcframework.zip
+fi
 
 xcodebuild -project whispertron.xcodeproj -scheme whispertron -configuration Release build ARCHS=arm64
 
