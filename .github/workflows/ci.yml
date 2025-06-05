@@ -1,0 +1,37 @@
+name: Build and publish artifact
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Grant execute permission for build script
+        run: chmod +x ./build.sh
+      - name: Build whispertron
+        run: ./build.sh
+      - name: Locate built app
+        id: find_app
+        run: |
+          APP_PATH=$(find "$HOME/Library/Developer/Xcode/DerivedData" -type d -name "whispertron.app" | head -n1)
+          echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
+      - name: Package build artifact
+        run: |
+          APP_PATH="${{ steps.find_app.outputs.app_path }}"
+          APP_DIR=$(dirname "$APP_PATH")
+          APP_NAME=$(basename "$APP_PATH")
+          cd "$APP_DIR"
+          zip -r whispertron.zip "$APP_NAME"
+          mv whispertron.zip "$GITHUB_WORKSPACE"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: whispertron.zip
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: 'Automated release of whispertron'
