@@ -5,6 +5,18 @@ Works on my:
 - M1 MacBook Air running MacOS 14.7.5 with XCode 16.1.
 - M4 Mac Mini running MacOS 15.1.1 with XCode 16.2.
 
+## Install
+
+### From Github
+
+Navigate to [releases](https://github.com/lynaghk/whispertron/releases/) and download the latest version.
+
+After downloading unzip it and double-click the `.app` file.
+
+Follow [this link](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/15.0/mac/15.0) to bypass the unknown developer warning.
+
+### From Source
+
 Run:
 
     ./build.sh
