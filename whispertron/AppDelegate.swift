@@ -12,6 +12,32 @@ enum FeedbackState {
   case transcribing
 }
 
+extension NSColor {
+  convenience init(hex: String) {
+    let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    var int: UInt64 = 0
+    Scanner(string: hex).scanHexInt64(&int)
+    let a, r, g, b: UInt64
+    switch hex.count {
+    case 3: // RGB (12-bit)
+      (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+    case 6: // RGB (24-bit)
+      (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+    case 8: // ARGB (32-bit)
+      (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+    default:
+      (a, r, g, b) = (1, 1, 1, 0)
+    }
+    
+    self.init(
+      red: CGFloat(r) / 255,
+      green: CGFloat(g) / 255,
+      blue: CGFloat(b) / 255,
+      alpha: CGFloat(a) / 255
+    )
+  }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
   private var statusItem: NSStatusItem!
   private var whisperContext: WhisperContext?
@@ -36,6 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private var feedbackImageView: NSImageView?
   private var lastTranscript = ""
   private let MinimumTranscriptionDuration = 1.0
+  private var audioLevelTimer: Timer?
   func applicationDidFinishLaunching(_ aNotification: Notification) {
 
     self.hotKey = HotKey(key: .h, modifiers: [.control, .shift])
@@ -124,7 +151,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     containerView.wantsLayer = true
     containerView.layer?.cornerRadius = 15
     containerView.layer?.masksToBounds = true
-    containerView.layer?.backgroundColor = NSColor(red: 0x28/255.0, green: 0x28/255.0, blue: 0x28/255.0, alpha: 1.0).cgColor
+    // containerView.layer?.backgroundColor = NSColor(hex: "282828").cgColor
+    containerView.layer?.backgroundColor = NSColor(hex: "FFAA20").cgColor
     
     feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
     feedbackImageView?.imageAlignment = .alignCenter
@@ -153,14 +181,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let coloredImage = image?.withSymbolConfiguration(config)
         
         self.feedbackImageView?.image = coloredImage
+        // self.feedbackImageView?.contentTintColor = NSColor(hex: "DABBFF")
+        self.feedbackImageView?.contentTintColor = NSColor(hex: "FFFFFF")
         
-        self.feedbackImageView?.contentTintColor = NSColor(red: 0xDA/255.0, green: 0xBB/255.0, blue: 0xFF/255.0, alpha: 1.0)
+        // Start pulsing for recording state
+        if state == .recording {
+          self.startAudioLevelPulsing()
+        } else {
+          self.stopAudioLevelPulsing()
+        }
         
         self.feedbackWindow?.makeKeyAndOrderFront(nil)
       } else {
+        self.stopAudioLevelPulsing()
         self.feedbackWindow?.orderOut(nil)
       }
     }
+  }
+
+  private func startAudioLevelPulsing() {
+    audioLevelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+      guard let self = self, let recorder = self.recorder else { return }
+      
+      Task {
+        let audioLevel = await recorder.getAudioLevel()
+        DispatchQueue.main.async {
+          var alpha = log2(1 + audioLevel * (64 - 1)) / log2(64)
+          alpha = min(1.0, 0.3 + alpha)
+          self.feedbackImageView?.alphaValue = CGFloat(alpha)
+        }
+      }
+    }
+  }
+
+  private func stopAudioLevelPulsing() {
+    audioLevelTimer?.invalidate()
+    audioLevelTimer = nil
+    feedbackImageView?.alphaValue = 1.0
   }
 
   //TODO: make this menu a microphone input selector?
