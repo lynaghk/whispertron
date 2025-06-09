@@ -57,6 +57,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // return image.withSymbolConfiguration(config) ?? image
   }()
   private var hotKey: HotKey?
+  
+  private let windowSize: CGFloat = 200.0
 
   private var feedbackWindow: NSWindow?
   private var feedbackImageView: NSImageView?
@@ -136,7 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func setupFeedbackWindow() {
     feedbackWindow = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 100, height: 100),
+      contentRect: NSRect(x: 0, y: 0, width: windowSize, height: windowSize),
       styleMask: [.borderless],
       backing: .buffered,
       defer: false)
@@ -144,17 +146,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     feedbackWindow?.level = .floating
     feedbackWindow?.isOpaque = false
     feedbackWindow?.backgroundColor = NSColor.clear
-    feedbackWindow?.hasShadow = true
+    feedbackWindow?.hasShadow = false
     feedbackWindow?.ignoresMouseEvents = true
     
-    let containerView = NSView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+    let containerView = NSView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
     containerView.wantsLayer = true
     containerView.layer?.cornerRadius = 15
     containerView.layer?.masksToBounds = true
     // containerView.layer?.backgroundColor = NSColor(hex: "282828").cgColor
-    containerView.layer?.backgroundColor = NSColor(hex: "FFAA20").cgColor
+    containerView.layer?.backgroundColor = NSColor(hex: "F9F9F9").cgColor
     
-    feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+    feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
     feedbackImageView?.imageAlignment = .alignCenter
     feedbackImageView?.imageScaling = .scaleProportionallyDown
 
@@ -168,21 +170,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       if let state = state {
         if let screen = NSScreen.main {
           let screenFrame = screen.visibleFrame
-          let windowSize = self.feedbackWindow?.frame.size ?? NSSize(width: 100, height: 100)
-          let centerX = screenFrame.midX - (windowSize.width / 2)
-          let centerY = screenFrame.midY - (windowSize.height / 2)
+          let centerX = screenFrame.midX - (windowSize / 2)
+          let centerY: CGFloat = 140.0
           self.feedbackWindow?.setFrameOrigin(NSPoint(x: centerX, y: centerY))
         }
 
         let iconName = state == .recording ? "music.mic" : "pencil.and.outline"
         let accessibilityDescription = state == .recording ? "recording" : "transcribing"
         let image = NSImage(systemSymbolName: iconName, accessibilityDescription: accessibilityDescription)
-        let config = NSImage.SymbolConfiguration(pointSize: 48, weight: .medium)
+        let config = NSImage.SymbolConfiguration(pointSize: 80, weight: .medium)
         let coloredImage = image?.withSymbolConfiguration(config)
         
         self.feedbackImageView?.image = coloredImage
         // self.feedbackImageView?.contentTintColor = NSColor(hex: "DABBFF")
-        self.feedbackImageView?.contentTintColor = NSColor(hex: "FFFFFF")
+        self.feedbackImageView?.contentTintColor = NSColor(hex: "777777")
         
         // Start pulsing for recording state
         if state == .recording {
@@ -200,7 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   private func startAudioLevelPulsing() {
-    audioLevelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+    audioLevelTimer = Timer.scheduledTimer(withTimeInterval: 0.0333, repeats: true) { [weak self] _ in
       guard let self = self, let recorder = self.recorder else { return }
       
       Task {
