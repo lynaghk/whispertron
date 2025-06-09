@@ -7,18 +7,23 @@ import HotKey
 import SwiftUI
 import os
 
+enum FeedbackState {
+  case recording
+  case transcribing
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
   private var statusItem: NSStatusItem!
   private var whisperContext: WhisperContext?
   private var recorder: Recorder?
   private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
   private let standbyImage: NSImage = {
-    let image = NSImage(systemSymbolName: "ear.fill", accessibilityDescription: "Standby")!
+    let image = NSImage(systemSymbolName: "music.mic", accessibilityDescription: "Standby")!
     image.isTemplate = true
     return image
   }()
   private let recordingImage: NSImage = {
-    let image = NSImage(systemSymbolName: "ear.fill", accessibilityDescription: "Standby")!
+    let image = NSImage(systemSymbolName: "music.mic", accessibilityDescription: "Standby")!
     image.isTemplate = true
     return image
     // let config = NSImage.SymbolConfiguration(hierarchicalColor: NSColor(red: 0xFF/255.0, green: 0xA9/255.0, blue: 0x15/255.0, alpha: 1.0))
@@ -28,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private var hotKey: HotKey?
 
   private var feedbackWindow: NSWindow?
-  private var feedbackTextField: NSTextField?
+  private var feedbackImageView: NSImageView?
   private var lastTranscript = ""
   private let MinimumTranscriptionDuration = 1.0
   func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -104,34 +109,53 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func setupFeedbackWindow() {
     feedbackWindow = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 200, height: 40),
+      contentRect: NSRect(x: 0, y: 0, width: 100, height: 100),
       styleMask: [.borderless],
       backing: .buffered,
       defer: false)
 
     feedbackWindow?.level = .floating
-    feedbackWindow?.isOpaque = true
+    feedbackWindow?.isOpaque = false
+    feedbackWindow?.backgroundColor = NSColor.clear
     feedbackWindow?.hasShadow = true
     feedbackWindow?.ignoresMouseEvents = true
+    
+    let containerView = NSView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+    containerView.wantsLayer = true
+    containerView.layer?.cornerRadius = 15
+    containerView.layer?.masksToBounds = true
+    containerView.layer?.backgroundColor = NSColor(red: 0x28/255.0, green: 0x28/255.0, blue: 0x28/255.0, alpha: 1.0).cgColor
+    
+    feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+    feedbackImageView?.imageAlignment = .alignCenter
+    feedbackImageView?.imageScaling = .scaleProportionallyDown
 
-    feedbackTextField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 40))
-    feedbackTextField?.alignment = .center
-    feedbackTextField?.isBezeled = false
-    feedbackTextField?.drawsBackground = false
-    feedbackTextField?.isEditable = false
-    feedbackTextField?.isSelectable = false
-
-    feedbackWindow?.contentView?.addSubview(feedbackTextField!)
+    containerView.addSubview(feedbackImageView!)
+    feedbackWindow?.contentView = containerView
   }
 
-  func showFeedback(_ text: String?) {
+  func showFeedback(_ state: FeedbackState?) {
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }
-      if let text = text {
-        let mouseLocation = NSEvent.mouseLocation
-        self.feedbackWindow?.setFrameOrigin(NSPoint(x: mouseLocation.x, y: mouseLocation.y))
+      if let state = state {
+        if let screen = NSScreen.main {
+          let screenFrame = screen.visibleFrame
+          let windowSize = self.feedbackWindow?.frame.size ?? NSSize(width: 100, height: 100)
+          let centerX = screenFrame.midX - (windowSize.width / 2)
+          let centerY = screenFrame.midY - (windowSize.height / 2)
+          self.feedbackWindow?.setFrameOrigin(NSPoint(x: centerX, y: centerY))
+        }
 
-        self.feedbackTextField?.stringValue = text
+        let iconName = state == .recording ? "music.mic" : "pencil.and.outline"
+        let accessibilityDescription = state == .recording ? "recording" : "transcribing"
+        let image = NSImage(systemSymbolName: iconName, accessibilityDescription: accessibilityDescription)
+        let config = NSImage.SymbolConfiguration(pointSize: 48, weight: .medium)
+        let coloredImage = image?.withSymbolConfiguration(config)
+        
+        self.feedbackImageView?.image = coloredImage
+        
+        self.feedbackImageView?.contentTintColor = NSColor(red: 0xDA/255.0, green: 0xBB/255.0, blue: 0xFF/255.0, alpha: 1.0)
+        
         self.feedbackWindow?.makeKeyAndOrderFront(nil)
       } else {
         self.feedbackWindow?.orderOut(nil)
@@ -171,7 +195,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc func didTapStandby() {
     logger.debug("didTapStandby")
-    showFeedback("transcribing...")
+    showFeedback(.transcribing)
     statusItem.button?.image = standbyImage
     statusItem.button?.cell?.isHighlighted = false
 
@@ -190,7 +214,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc func didTapRecording() {
     logger.debug("didTapRecording")
-    showFeedback("recording")
+    showFeedback(.recording)
     statusItem.button?.image = recordingImage
     statusItem.button?.appearsDisabled = false
     statusItem.button?.cell?.isHighlighted = true
