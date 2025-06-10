@@ -12,10 +12,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private var whisperContext: WhisperContext?
   private var recorder: Recorder?
   private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
-  private let standbyImage = NSImage(
-    systemSymbolName: "circle", accessibilityDescription: "Standby")
-  private let recordingImage = NSImage(
-    systemSymbolName: "circle.fill", accessibilityDescription: "Recording")
+  private let standbyImage: NSImage = {
+    let image = NSImage(systemSymbolName: "ear.fill", accessibilityDescription: "Standby")!
+    image.isTemplate = true
+    return image
+  }()
+  private let recordingImage: NSImage = {
+    let image = NSImage(systemSymbolName: "ear.fill", accessibilityDescription: "Standby")!
+    image.isTemplate = true
+    return image
+    // let config = NSImage.SymbolConfiguration(hierarchicalColor: NSColor(red: 0xFF/255.0, green: 0xA9/255.0, blue: 0x15/255.0, alpha: 1.0))
+    // let image = NSImage(systemSymbolName: "ear.fill", accessibilityDescription: "Recording")!
+    // return image.withSymbolConfiguration(config) ?? image
+  }()
   private var hotKey: HotKey?
 
   private var feedbackWindow: NSWindow?
@@ -164,6 +173,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     logger.debug("didTapStandby")
     showFeedback("transcribing...")
     statusItem.button?.image = standbyImage
+    statusItem.button?.cell?.isHighlighted = false
 
     Task {
       await recorder!.stopRecording()
@@ -182,6 +192,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     logger.debug("didTapRecording")
     showFeedback("recording")
     statusItem.button?.image = recordingImage
+    statusItem.button?.appearsDisabled = false
+    statusItem.button?.cell?.isHighlighted = true
 
     Task {
       do {
