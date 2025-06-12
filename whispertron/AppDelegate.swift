@@ -7,21 +7,64 @@ import HotKey
 import SwiftUI
 import os
 
+enum FeedbackState {
+  case recording
+  case transcribing
+}
+
+extension NSColor {
+  convenience init(hex: String) {
+    let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    var int: UInt64 = 0
+    Scanner(string: hex).scanHexInt64(&int)
+    let a, r, g, b: UInt64
+    switch hex.count {
+    case 3: // RGB (12-bit)
+      (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+    case 6: // RGB (24-bit)
+      (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+    case 8: // ARGB (32-bit)
+      (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+    default:
+      (a, r, g, b) = (1, 1, 1, 0)
+    }
+    
+    self.init(
+      red: CGFloat(r) / 255,
+      green: CGFloat(g) / 255,
+      blue: CGFloat(b) / 255,
+      alpha: CGFloat(a) / 255
+    )
+  }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
   private var statusItem: NSStatusItem!
   private var whisperContext: WhisperContext?
   private var recorder: Recorder?
   private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
-  private let standbyImage = NSImage(
-    systemSymbolName: "circle", accessibilityDescription: "Standby")
-  private let recordingImage = NSImage(
-    systemSymbolName: "circle.fill", accessibilityDescription: "Recording")
+  private let standbyImage: NSImage = {
+    let image = NSImage(systemSymbolName: "music.mic", accessibilityDescription: "Standby")!
+    image.isTemplate = true
+    return image
+  }()
+  private let recordingImage: NSImage = {
+    let image = NSImage(systemSymbolName: "music.mic", accessibilityDescription: "Standby")!
+    image.isTemplate = true
+    return image
+    // let config = NSImage.SymbolConfiguration(hierarchicalColor: NSColor(red: 0xFF/255.0, green: 0xA9/255.0, blue: 0x15/255.0, alpha: 1.0))
+    // let image = NSImage(systemSymbolName: "ear.fill", accessibilityDescription: "Recording")!
+    // return image.withSymbolConfiguration(config) ?? image
+  }()
   private var hotKey: HotKey?
+  
+  private let windowSize: CGFloat = 200.0
 
   private var feedbackWindow: NSWindow?
-  private var feedbackTextField: NSTextField?
+  private var feedbackImageView: NSImageView?
   private var lastTranscript = ""
   private let MinimumTranscriptionDuration = 1.0
+  private var audioLevelTimer: Timer?
   func applicationDidFinishLaunching(_ aNotification: Notification) {
 
     self.hotKey = HotKey(key: .h, modifiers: [.control, .shift])
@@ -95,39 +138,87 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func setupFeedbackWindow() {
     feedbackWindow = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 200, height: 40),
+      contentRect: NSRect(x: 0, y: 0, width: windowSize, height: windowSize),
       styleMask: [.borderless],
       backing: .buffered,
       defer: false)
 
     feedbackWindow?.level = .floating
-    feedbackWindow?.isOpaque = true
-    feedbackWindow?.hasShadow = true
+    feedbackWindow?.isOpaque = false
+    feedbackWindow?.backgroundColor = NSColor.clear
+    feedbackWindow?.hasShadow = false
     feedbackWindow?.ignoresMouseEvents = true
+    
+    let containerView = NSView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
+    containerView.wantsLayer = true
+    containerView.layer?.cornerRadius = 15
+    containerView.layer?.masksToBounds = true
+    // containerView.layer?.backgroundColor = NSColor(hex: "282828").cgColor
+    containerView.layer?.backgroundColor = NSColor(hex: "F9F9F9").cgColor
+    
+    feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
+    feedbackImageView?.imageAlignment = .alignCenter
+    feedbackImageView?.imageScaling = .scaleProportionallyDown
 
-    feedbackTextField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 40))
-    feedbackTextField?.alignment = .center
-    feedbackTextField?.isBezeled = false
-    feedbackTextField?.drawsBackground = false
-    feedbackTextField?.isEditable = false
-    feedbackTextField?.isSelectable = false
-
-    feedbackWindow?.contentView?.addSubview(feedbackTextField!)
+    containerView.addSubview(feedbackImageView!)
+    feedbackWindow?.contentView = containerView
   }
 
-  func showFeedback(_ text: String?) {
+  func showFeedback(_ state: FeedbackState?) {
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }
-      if let text = text {
-        let mouseLocation = NSEvent.mouseLocation
-        self.feedbackWindow?.setFrameOrigin(NSPoint(x: mouseLocation.x, y: mouseLocation.y))
+      if let state = state {
+        if let screen = NSScreen.main {
+          let screenFrame = screen.visibleFrame
+          let centerX = screenFrame.midX - (windowSize / 2)
+          let centerY: CGFloat = 140.0
+          self.feedbackWindow?.setFrameOrigin(NSPoint(x: centerX, y: centerY))
+        }
 
-        self.feedbackTextField?.stringValue = text
+        let iconName = state == .recording ? "music.mic" : "pencil.and.outline"
+        let accessibilityDescription = state == .recording ? "recording" : "transcribing"
+        let image = NSImage(systemSymbolName: iconName, accessibilityDescription: accessibilityDescription)
+        let config = NSImage.SymbolConfiguration(pointSize: 80, weight: .medium)
+        let coloredImage = image?.withSymbolConfiguration(config)
+        
+        self.feedbackImageView?.image = coloredImage
+        // self.feedbackImageView?.contentTintColor = NSColor(hex: "DABBFF")
+        self.feedbackImageView?.contentTintColor = NSColor(hex: "777777")
+        
+        // Start pulsing for recording state
+        if state == .recording {
+          self.startAudioLevelPulsing()
+        } else {
+          self.stopAudioLevelPulsing()
+        }
+        
         self.feedbackWindow?.makeKeyAndOrderFront(nil)
       } else {
+        self.stopAudioLevelPulsing()
         self.feedbackWindow?.orderOut(nil)
       }
     }
+  }
+
+  private func startAudioLevelPulsing() {
+    audioLevelTimer = Timer.scheduledTimer(withTimeInterval: 0.0333, repeats: true) { [weak self] _ in
+      guard let self = self, let recorder = self.recorder else { return }
+      
+      Task {
+        let audioLevel = await recorder.getAudioLevel()
+        DispatchQueue.main.async {
+          var alpha = log2(1 + audioLevel * (64 - 1)) / log2(64)
+          alpha = min(1.0, 0.3 + alpha)
+          self.feedbackImageView?.alphaValue = CGFloat(alpha)
+        }
+      }
+    }
+  }
+
+  private func stopAudioLevelPulsing() {
+    audioLevelTimer?.invalidate()
+    audioLevelTimer = nil
+    feedbackImageView?.alphaValue = 1.0
   }
 
   //TODO: make this menu a microphone input selector?
@@ -162,8 +253,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc func didTapStandby() {
     logger.debug("didTapStandby")
-    showFeedback("transcribing...")
+    showFeedback(.transcribing)
     statusItem.button?.image = standbyImage
+    statusItem.button?.cell?.isHighlighted = false
 
     Task {
       await recorder!.stopRecording()
@@ -180,8 +272,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc func didTapRecording() {
     logger.debug("didTapRecording")
-    showFeedback("recording")
+    showFeedback(.recording)
     statusItem.button?.image = recordingImage
+    statusItem.button?.appearsDisabled = false
+    statusItem.button?.cell?.isHighlighted = true
 
     Task {
       do {

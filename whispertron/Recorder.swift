@@ -26,6 +26,7 @@ actor Recorder {
   private var converter: AVAudioConverter?
   private var isRecording = false
   private var deviceChangeObservers: [NSObjectProtocol] = []
+  private var currentAudioLevel: Float = 0.0
 
   private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Recorder")
 
@@ -201,6 +202,11 @@ actor Recorder {
   }
 
   private func processAudio(samples: [Float]) async {
+    // Calculate RMS (Root Mean Square) for audio level
+    let sumOfSquares = samples.reduce(0) { $0 + $1 * $1 }
+    let rms = sqrt(sumOfSquares / Float(samples.count))
+    currentAudioLevel = min(rms * 10, 1.0) // Scale and clamp to 0-1
+    
     if let downsampledChunk = downsample(samples) {
       audioBuffer.append(contentsOf: downsampledChunk)
     }
@@ -262,6 +268,10 @@ actor Recorder {
     let downsampledData = UnsafeBufferPointer(
       start: outputBuffer.floatChannelData?[0], count: Int(outputBuffer.frameLength))
     return Array(downsampledData)
+  }
+
+  func getAudioLevel() -> Float {
+    return currentAudioLevel
   }
 
   func transcribe() async -> String {

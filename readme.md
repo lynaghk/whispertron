@@ -43,6 +43,10 @@ Have a great day!
 
 # log
 
+## 2025 Jun 12 - stylistic changes
+
+Nikita contacted me with some nice stylistic changes that he vibe-coded with Claude, which I've merged in.
+
 ## 2025 May 3 - updated to latest Whisper.cpp
 
 This should be faster than the previous version, since now Whisper.cpp uses Metal on MacOS.
