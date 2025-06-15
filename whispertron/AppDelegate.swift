@@ -36,6 +36,10 @@ extension NSColor {
       alpha: CGFloat(a) / 255
     )
   }
+  
+  static var isDarkMode: Bool {
+    return NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+  }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -66,6 +70,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private let MinimumTranscriptionDuration = 1.0
   private var audioLevelTimer: Timer?
   func applicationDidFinishLaunching(_ aNotification: Notification) {
+    
+    DistributedNotificationCenter.default.addObserver(
+      self,
+      selector: #selector(appearanceChanged),
+      name: NSNotification.Name("AppleInterfaceThemeChangedNotification"),
+      object: nil
+    )
 
     self.hotKey = HotKey(key: .h, modifiers: [.control, .shift])
     hotKey?.keyDownHandler = { [weak self] in
@@ -153,8 +164,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     containerView.wantsLayer = true
     containerView.layer?.cornerRadius = 15
     containerView.layer?.masksToBounds = true
-    // containerView.layer?.backgroundColor = NSColor(hex: "282828").cgColor
-    containerView.layer?.backgroundColor = NSColor(hex: "F9F9F9").cgColor
+    containerView.layer?.backgroundColor = (NSColor.isDarkMode ? NSColor(hex: "141414") : NSColor(hex: "F9F9F9")).cgColor
     
     feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
     feedbackImageView?.imageAlignment = .alignCenter
@@ -182,8 +192,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let coloredImage = image?.withSymbolConfiguration(config)
         
         self.feedbackImageView?.image = coloredImage
-        // self.feedbackImageView?.contentTintColor = NSColor(hex: "DABBFF")
-        self.feedbackImageView?.contentTintColor = NSColor(hex: "777777")
+        self.feedbackImageView?.contentTintColor = NSColor.isDarkMode ? NSColor(hex: "525252") : NSColor(hex: "777777")
         
         // Start pulsing for recording state
         if state == .recording {
@@ -284,5 +293,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         logger.error("Error starting recording: \(error.localizedDescription)")
       }
     }
+  }
+  
+  @objc func appearanceChanged() {
+    DispatchQueue.main.async { [weak self] in
+      self?.updateFeedbackWindowAppearance()
+    }
+  }
+  
+  private func updateFeedbackWindowAppearance() {
+    guard let containerView = feedbackWindow?.contentView else { return }
+    containerView.layer?.backgroundColor = NSColor.isDarkMode ? NSColor(hex: "141414").cgColor : NSColor(hex: "F9F9F9").cgColor
+    feedbackImageView?.contentTintColor = NSColor.isDarkMode ? NSColor(hex: "525252") : NSColor(hex: "777777")
   }
 }
