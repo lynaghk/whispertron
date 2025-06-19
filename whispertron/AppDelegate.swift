@@ -36,6 +36,10 @@ extension NSColor {
       alpha: CGFloat(a) / 255
     )
   }
+  
+  static var isDarkMode: Bool {
+    return NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+  }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -59,6 +63,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private var hotKey: HotKey?
   
   private let windowSize: CGFloat = 200.0
+  private let darkFg = NSColor(hex: "CCCCCC")
+  private let lightFg = NSColor(hex: "333333")
 
   private var feedbackWindow: NSWindow?
   private var feedbackImageView: NSImageView?
@@ -66,6 +72,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private let MinimumTranscriptionDuration = 1.0
   private var audioLevelTimer: Timer?
   func applicationDidFinishLaunching(_ aNotification: Notification) {
+    
+    DistributedNotificationCenter.default.addObserver(
+      self,
+      selector: #selector(appearanceChanged),
+      name: NSNotification.Name("AppleInterfaceThemeChangedNotification"),
+      object: nil
+    )
 
     self.hotKey = HotKey(key: .h, modifiers: [.control, .shift])
     hotKey?.keyDownHandler = { [weak self] in
@@ -149,19 +162,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     feedbackWindow?.hasShadow = false
     feedbackWindow?.ignoresMouseEvents = true
     
-    let containerView = NSView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
-    containerView.wantsLayer = true
-    containerView.layer?.cornerRadius = 15
-    containerView.layer?.masksToBounds = true
-    // containerView.layer?.backgroundColor = NSColor(hex: "282828").cgColor
-    containerView.layer?.backgroundColor = NSColor(hex: "F9F9F9").cgColor
+    // Create visual effect view for blur and transparency
+    let visualEffectView = NSVisualEffectView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
+    visualEffectView.material = .hudWindow
+    visualEffectView.blendingMode = .behindWindow
+    visualEffectView.state = .active
+    visualEffectView.wantsLayer = true
+    visualEffectView.layer?.cornerRadius = 15
+    visualEffectView.layer?.masksToBounds = true
     
     feedbackImageView = NSImageView(frame: NSRect(x: 0, y: 0, width: windowSize, height: windowSize))
     feedbackImageView?.imageAlignment = .alignCenter
     feedbackImageView?.imageScaling = .scaleProportionallyDown
 
-    containerView.addSubview(feedbackImageView!)
-    feedbackWindow?.contentView = containerView
+    visualEffectView.addSubview(feedbackImageView!)
+    feedbackWindow?.contentView = visualEffectView
   }
 
   func showFeedback(_ state: FeedbackState?) {
@@ -182,8 +197,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let coloredImage = image?.withSymbolConfiguration(config)
         
         self.feedbackImageView?.image = coloredImage
-        // self.feedbackImageView?.contentTintColor = NSColor(hex: "DABBFF")
-        self.feedbackImageView?.contentTintColor = NSColor(hex: "777777")
+        updateFeedbackWindowAppearance()
         
         // Start pulsing for recording state
         if state == .recording {
@@ -284,5 +298,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         logger.error("Error starting recording: \(error.localizedDescription)")
       }
     }
+  }
+  
+  @objc func appearanceChanged() {
+    DispatchQueue.main.async { [weak self] in
+      self?.updateFeedbackWindowAppearance()
+    }
+  }
+  
+  private func updateFeedbackWindowAppearance() {
+    // guard let visualEffectView = feedbackWindow?.contentView as? NSVisualEffectView else { return }
+    // Visual effect view automatically adapts to system appearance
+    // visualEffectView.material = .hudWindow
+    feedbackImageView?.contentTintColor = NSColor.isDarkMode ? darkFg : lightFg
   }
 }
