@@ -42,7 +42,7 @@ extension NSColor {
   }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, HotkeyRecorderDelegate {
   private var statusItem: NSStatusItem!
   private var whisperContext: WhisperContext?
   private var recorder: Recorder?
@@ -71,6 +71,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private var lastTranscript = ""
   private let MinimumTranscriptionDuration = 1.0
   private var audioLevelTimer: Timer?
+  private var settingsWindow: NSWindow?
+  private var hotkeyRecorderView: HotkeyRecorderView?
+  
+  // Hotkey persistence
+  private var savedHotkey: HotkeyRecorderView.Hotkey? {
+    get {
+      guard let keyCodeNumber = UserDefaults.standard.object(forKey: "hotkeyKeyCode") as? NSNumber,
+            let modifiersNumber = UserDefaults.standard.object(forKey: "hotkeyModifiers") as? NSNumber else {
+        return nil
+      }
+      let keyCode = keyCodeNumber.uint32Value
+      let modifiers = NSEvent.ModifierFlags(rawValue: modifiersNumber.uintValue)
+      return HotkeyRecorderView.Hotkey(keyCode: keyCode, modifiers: modifiers)
+    }
+    set {
+      if let hotkey = newValue {
+        UserDefaults.standard.set(NSNumber(value: hotkey.keyCode), forKey: "hotkeyKeyCode")
+        UserDefaults.standard.set(NSNumber(value: hotkey.modifiers.rawValue), forKey: "hotkeyModifiers")
+      } else {
+        UserDefaults.standard.removeObject(forKey: "hotkeyKeyCode")
+        UserDefaults.standard.removeObject(forKey: "hotkeyModifiers")
+      }
+    }
+  }
   func applicationDidFinishLaunching(_ aNotification: Notification) {
     
     DistributedNotificationCenter.default.addObserver(
@@ -80,13 +104,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       object: nil
     )
 
-    self.hotKey = HotKey(key: .h, modifiers: [.control, .shift])
-    hotKey?.keyDownHandler = { [weak self] in
-      self?.didTapRecording()
-    }
-    hotKey?.keyUpHandler = { [weak self] in
-      self?.didTapStandby()
-    }
+    // Initialize hotkey from saved preferences or default
+    let initialHotkey = savedHotkey ?? HotkeyRecorderView.Hotkey(keyCode: 4, modifiers: [.control, .shift]) // Default Ctrl+Shift+H
+    updateGlobalHotkey(initialHotkey)
 
     // Configure audio session
     configureAudioSession()
@@ -124,6 +144,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   // Translated from espanso's injectString function
   func insertStringAtCursor(_ string: String) {
+    logger.debug("insertStringAtCursor: \(string)")
+
     let udelay = UInt32(1000)
 
     DispatchQueue.main.async {
@@ -252,6 +274,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     menu.addItem(recording)
 
     menu.addItem(NSMenuItem.separator())
+    
+    let settings = NSMenuItem(title: "Settings...", action: #selector(showSettings), keyEquivalent: ",")
+    menu.addItem(settings)
+
+    menu.addItem(NSMenuItem.separator())
 
     menu.addItem(
       NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
@@ -263,6 +290,62 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     if let url = URL(string: "https://www.github.com/lynaghk/whispertron") {
       NSWorkspace.shared.open(url)
     }
+  }
+  
+  @objc func showSettings() {
+    if settingsWindow == nil {
+      createSettingsWindow()
+    }
+    
+    settingsWindow?.makeKeyAndOrderFront(nil)
+    NSApp.activate(ignoringOtherApps: true)
+  }
+  
+  private func createSettingsWindow() {
+    let windowWidth: CGFloat = 400
+    let windowHeight: CGFloat = 180
+    
+    settingsWindow = NSWindow(
+      contentRect: NSRect(x: 0, y: 0, width: windowWidth, height: windowHeight),
+      styleMask: [.titled, .closable],
+      backing: .buffered,
+      defer: false)
+    
+    settingsWindow?.title = "Whispertron Settings"
+    settingsWindow?.center()
+    settingsWindow?.isReleasedWhenClosed = false
+    
+    // Create content view
+    let contentView = NSView(frame: NSRect(x: 0, y: 0, width: windowWidth, height: windowHeight))
+    
+    // Hotkey configuration section
+    let titleLabel = NSTextField(labelWithString: "Recording Hotkey:")
+    titleLabel.frame = NSRect(x: 20, y: windowHeight - 60, width: 120, height: 20)
+    contentView.addSubview(titleLabel)
+    
+    // Create and configure hotkey recorder view
+    hotkeyRecorderView = HotkeyRecorderView(frame: NSRect(x: 150, y: windowHeight - 62, width: 200, height: 24))
+    hotkeyRecorderView?.delegate = self
+    
+    // Set initial hotkey to match current saved hotkey
+    let currentHotkey = savedHotkey ?? HotkeyRecorderView.Hotkey(keyCode: 4, modifiers: [.control, .shift])
+    hotkeyRecorderView?.setHotkey(currentHotkey)
+    
+    contentView.addSubview(hotkeyRecorderView!)
+    
+    // Close button
+    let closeButton = NSButton(frame: NSRect(x: windowWidth - 80, y: 20, width: 60, height: 32))
+    closeButton.title = "Close"
+    closeButton.bezelStyle = .rounded
+    closeButton.target = self
+    closeButton.action = #selector(closeSettings)
+    contentView.addSubview(closeButton)
+    
+    settingsWindow?.contentView = contentView
+  }
+  
+  @objc func closeSettings() {
+    settingsWindow?.orderOut(nil)
   }
 
   @objc func didTapStandby() {
@@ -311,5 +394,71 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Visual effect view automatically adapts to system appearance
     // visualEffectView.material = .hudWindow
     feedbackImageView?.contentTintColor = NSColor.isDarkMode ? darkFg : lightFg
+  }
+  
+  // MARK: - Hotkey Management
+  
+  private func updateGlobalHotkey(_ recordedHotkey: HotkeyRecorderView.Hotkey) {
+    // Remove the current hotkey
+    hotKey = nil
+    
+    // Convert NSEvent.ModifierFlags to HotKey.ModifierFlags
+    var modifiers: NSEvent.ModifierFlags = []
+    if recordedHotkey.modifiers.contains(.command) { modifiers.insert(.command) }
+    if recordedHotkey.modifiers.contains(.control) { modifiers.insert(.control) }
+    if recordedHotkey.modifiers.contains(.option) { modifiers.insert(.option) }
+    if recordedHotkey.modifiers.contains(.shift) { modifiers.insert(.shift) }
+    
+    // Use HotKey library's built-in conversion
+    guard let key = Key(carbonKeyCode: recordedHotkey.keyCode) else {
+      logger.error("Unable to convert keyCode \(recordedHotkey.keyCode) to HotKey.Key")
+      return
+    }
+    
+    // Create new hotkey
+    let newHotKey = HotKey(key: key, modifiers: modifiers)
+    newHotKey.keyDownHandler = { [weak self] in
+      self?.didTapRecording()
+    }
+    newHotKey.keyUpHandler = { [weak self] in
+      self?.didTapStandby()
+    }
+    
+    hotKey = newHotKey
+    logger.info("Updated global hotkey to: \(recordedHotkey.displayString)")
+  }
+  
+  private func disableGlobalHotkey() {
+    hotKey = nil
+    logger.info("Global hotkey disabled during recording")
+  }
+  
+  private func enableGlobalHotkey() {
+    // Re-enable with current hotkey from UI
+    if let currentHotkey = hotkeyRecorderView?.getHotkey() {
+      updateGlobalHotkey(currentHotkey)
+    }
+  }
+
+  // MARK: - HotkeyRecorderDelegate
+  
+  func hotkeyRecorder(_ recorder: HotkeyRecorderView, didRecord hotkey: HotkeyRecorderView.Hotkey) {
+    logger.info("UI recorded hotkey: \(hotkey.displayString)")
+    savedHotkey = hotkey // Save to UserDefaults
+    updateGlobalHotkey(hotkey)
+  }
+  
+  func hotkeyRecorderDidCancelRecording(_ recorder: HotkeyRecorderView) {
+    logger.info("Hotkey recording cancelled")
+  }
+  
+  func hotkeyRecorderDidStartRecording(_ recorder: HotkeyRecorderView) {
+    logger.info("Hotkey recording started - disabling global hotkey")
+    disableGlobalHotkey()
+  }
+  
+  func hotkeyRecorderDidStopRecording(_ recorder: HotkeyRecorderView) {
+    logger.info("Hotkey recording stopped - re-enabling global hotkey")
+    enableGlobalHotkey()
   }
 }

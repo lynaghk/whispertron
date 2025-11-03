@@ -13,6 +13,7 @@
 		40F8347C2CA71E4E007DAA65 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F8347B2CA71E4E007DAA65 /* main.swift */; };
 		40F834812CA724C8007DAA65 /* LibWhisper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F834802CA724C8007DAA65 /* LibWhisper.swift */; };
 		40F834832CA72889007DAA65 /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F834822CA72889007DAA65 /* Recorder.swift */; };
+		5ED2BE442E0E3DAF00CEAECF /* HotkeyRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED2BE432E0E3DAF00CEAECF /* HotkeyRecorderView.swift */; };
 		D73B39372DC6622E00F3B948 /* whisper.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D73B39362DC6622E00F3B948 /* whisper.xcframework */; };
 		D73B39382DC6622E00F3B948 /* whisper.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D73B39362DC6622E00F3B948 /* whisper.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D7ECCB332CB9429E00558635 /* models in Resources */ = {isa = PBXBuildFile; fileRef = D7ECCB322CB9429E00558635 /* models */; };
@@ -41,6 +42,7 @@
 		40F8347B2CA71E4E007DAA65 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		40F834802CA724C8007DAA65 /* LibWhisper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibWhisper.swift; sourceTree = "<group>"; };
 		40F834822CA72889007DAA65 /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
+		5ED2BE432E0E3DAF00CEAECF /* HotkeyRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyRecorderView.swift; sourceTree = "<group>"; };
 		D73B39362DC6622E00F3B948 /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = "whisper_xcframework/build-apple/whisper.xcframework"; sourceTree = "<group>"; };
 		D7C3BEB12CBACF0E00AEB012 /* whispertron.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = whispertron.entitlements; sourceTree = "<group>"; };
 		D7ECCB322CB9429E00558635 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = whispertron/models; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 		40F834692CA70F3A007DAA65 /* whispertron */ = {
 			isa = PBXGroup;
 			children = (
+				5ED2BE432E0E3DAF00CEAECF /* HotkeyRecorderView.swift */,
 				40F8347B2CA71E4E007DAA65 /* main.swift */,
 				40F8346A2CA70F3A007DAA65 /* AppDelegate.swift */,
 				40F8346C2CA70F3A007DAA65 /* ViewController.swift */,
@@ -178,6 +181,7 @@
 			files = (
 				40F834832CA72889007DAA65 /* Recorder.swift in Sources */,
 				40F834812CA724C8007DAA65 /* LibWhisper.swift in Sources */,
+				5ED2BE442E0E3DAF00CEAECF /* HotkeyRecorderView.swift in Sources */,
 				40F8346D2CA70F3A007DAA65 /* ViewController.swift in Sources */,
 				40F8346B2CA70F3A007DAA65 /* AppDelegate.swift in Sources */,
 				40F8347C2CA71E4E007DAA65 /* main.swift in Sources */,
