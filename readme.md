@@ -43,6 +43,13 @@ Have a great day!
 
 # log
 
+## 2025 Dec 20 - Use CoreML model for better performance.
+
+Mixing the pre-built encoder on huggingface with a quantized version of the same model seems to work fine.
+
+Let's try this for now, since it's easier and faster than having people generate the CoreML model themselves from the ggml model. For that, see https://github.com/ggml-org/whisper.cpp/issues/2783
+
+
 ## 2025 Nov 3 - merged PR #4 adding settings menu
 
 This lets you customize the activation key without editing the source code. Thanks @algal!
