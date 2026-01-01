@@ -20,10 +20,12 @@ Hold down Control-Shift-H, say something, release Control-Shift-H, watch text ap
 You can edit this activation key via the settings menu.
 I'm open to pairing or PRs that:
 
+- Drag videos/audio files to tray icon (or show menu when they're detected on pasteboard) for quick transcription.
+- Change the mic icon to a waveform so that it's easier to notice when you're accidentally muted.
 - make it easier for other people to build (is it possible without XCode?)
 - graphically select and download Whisper models besides the base English one
 - implement live transcription with a principled approach like [Whisper Streaming](https://github.com/ufal/whisper_streaming/) (I assume it's good based on the video demos, but couldn't run it myself because, lol, [Python dependencies](https://github.com/ufal/whisper_streaming/issues/129))
-- add a simple CLI that makes it easy to, e.g., get rough transcription of long, unchaptered YouTube videos so you can jump to parts.
+- add a simple CLI that makes it easy to, e.g., get rough transcription of long, unchaptered YouTube videos so you can jump to parts. Or just package the whisper-cli binary in the app?
 - Don't add a leading space when writing into Emacs
 - Optionally use larger model
 
